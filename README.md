@@ -2,7 +2,7 @@
 
 A stateful, conversational AI chatbot built using **LangGraph** for orchestration and **Groq** for ultra-fast inference. The application features a clean user interface powered by **Streamlit** and supports persistent conversation memory.
 
-🔗 **[Live Demo](chat-graph.streamlit.app/)** _(Click to chat!)_
+🔗 **[Live Demo](https://chat-graph.streamlit.app/)** _(Click to chat!)_
 
 ## ✨ Features
 
