@@ -1,13 +1,16 @@
 import streamlit as st
-# Import clear_database from backend
-from langgraph_backend import chatbot, retrive_all_threads, clear_database
+import uuid
+from langgraph_backend import chatbot, clear_database
 from langchain_core.messages import HumanMessage, SystemMessage
 from langchain_groq import ChatGroq
-import uuid
+
+from session_db import init_db, save_session_title, get_all_sessions, delete_all_sessions
+init_db()
 
 # --- 1. Helper Functions ---
 
 def generate_title(first_message_content):
+    """Generates a short title using LLM based on the first message."""
     try:
         llm = ChatGroq(model="llama-3.1-8b-instant")
         messages = [
@@ -16,27 +19,14 @@ def generate_title(first_message_content):
         ]
         response = llm.invoke(messages)
         title = response.content.strip()
-        if len(title) > 50:
-            return title[:47] + "..."
+        if len(title) > 30:
+            return title[:27] + "..."
         return title
     except Exception:
         return "New Conversation"
 
-def generate_thread_id():
-    return str(uuid.uuid4())
-
-def reset_chat():
-    new_id = generate_thread_id()
-    st.session_state['thread_id'] = new_id
-    add_thread(new_id)
-    st.session_state['thread_names'][new_id] = "New Chat..."
-    st.session_state['message_history'] = []
-
-def add_thread(thread_id):
-    if thread_id not in st.session_state['chat_threads']:
-        st.session_state['chat_threads'].append(thread_id)
-
 def load_convo(thread_id):
+    """Loads message history from LangGraph state."""
     config = {"configurable": {"thread_id": thread_id}}
     state = chatbot.get_state(config)
     return state.values.get("messages", [])
@@ -44,67 +34,82 @@ def load_convo(thread_id):
 # --- 2. Session State Initialization ---
 
 if "thread_id" not in st.session_state:
-    st.session_state["thread_id"] = generate_thread_id()
-
-if 'chat_threads' not in st.session_state:
-    st.session_state['chat_threads'] = retrive_all_threads()
-
-if 'thread_names' not in st.session_state:
-    st.session_state['thread_names'] = {}
+    # Default to a new random ID if none exists
+    st.session_state["thread_id"] = str(uuid.uuid4())
 
 if 'message_history' not in st.session_state:
     st.session_state['message_history'] = []
 
-# Ensure current thread is tracked
-add_thread(st.session_state['thread_id'])
-if st.session_state['thread_id'] not in st.session_state['thread_names']:
-    st.session_state['thread_names'][st.session_state['thread_id']] = "New Chat..."
-
-CONFIG = {"configurable": {"thread_id": st.session_state["thread_id"]}}
-
-# --- 3. Sidebar (Menu Logic) ---
+# --- 3. Sidebar (Persistent Menu Logic) ---
 
 with st.sidebar:
     st.title("LangGraph Chat")
     
+    # 1. New Chat Button
     if st.button("➕ New Chat", use_container_width=True):
-        reset_chat()
+        new_id = str(uuid.uuid4())
+        save_session_title(new_id, "New Chat")
+        st.session_state['thread_id'] = new_id
+        st.session_state['message_history'] = []
         st.rerun()
     
     st.markdown("---")
     st.header("History")
 
-    if st.session_state['chat_threads']:
-        options = st.session_state['chat_threads'][::-1]
-        try:
-            curr_idx = options.index(st.session_state['thread_id'])
-        except ValueError:
-            curr_idx = 0
+    # 2. Load Sessions from DB (Persistent)
+    # db_sessions is a list of tuples
+    db_sessions = get_all_sessions()
+    
+    # Reverse so newest is at the top
+    db_sessions = db_sessions[::-1] 
+    
+    # Extract IDs and Titles for the Radio button
+    thread_ids = [s[0] for s in db_sessions]
+    thread_titles = {s[0]: s[1] for s in db_sessions}
 
-        selected_id = st.radio(
-            "Select Chat",
-            options=options,
-            format_func=lambda x: (st.session_state['thread_names'].get(x, "New Chat")[:30] + '...') if len(st.session_state['thread_names'].get(x, "New Chat")) > 30 else st.session_state['thread_names'].get(x, "New Chat"),
-            index=curr_idx,
-            label_visibility="collapsed"
-        )
+    # Ensure current thread is in the list (edge case for very first run)
+    if st.session_state['thread_id'] not in thread_ids:
+        thread_ids.insert(0, st.session_state['thread_id'])
+        thread_titles[st.session_state['thread_id']] = "New Chat"
 
-        if selected_id != st.session_state['thread_id']:
-            st.session_state['thread_id'] = selected_id
-            messages = load_convo(selected_id)
-            temp_msgs = []
-            for msg in messages:
-                role = 'user' if isinstance(msg, HumanMessage) else 'assistant'
-                temp_msgs.append({'role': role, 'content': msg.content})
-            st.session_state['message_history'] = temp_msgs
-            st.rerun()
+    # Find index of current thread
+    try:
+        curr_idx = thread_ids.index(st.session_state['thread_id'])
+    except ValueError:
+        curr_idx = 0
 
-    # --- STYLE INJECTION: Red Button ---
+    # 3. Selection Menu
+    selected_id = st.radio(
+        "Select Chat",
+        options=thread_ids,
+        format_func=lambda x: thread_titles.get(x, "New Chat"),
+        index=curr_idx,
+        label_visibility="collapsed"
+    )
+
+    # 4. Handle Switching Chats
+    if selected_id != st.session_state['thread_id']:
+        st.session_state['thread_id'] = selected_id
+        
+        # Load messages from LangGraph backend
+        messages = load_convo(selected_id)
+        
+        # Format for Streamlit UI
+        temp_msgs = []
+        for msg in messages:
+            role = 'user' if isinstance(msg, HumanMessage) else 'assistant'
+            temp_msgs.append({'role': role, 'content': msg.content})
+            
+        st.session_state['message_history'] = temp_msgs
+        st.rerun()
+
+    # --- STYLE INJECTION ---
     st.markdown("""
         <style>
         div.stButton > button:first-child {
             width: 100%;
         }
+        /* Target the Clear History button specifically if possible, or last button */
         div.stButton > button:last-child {
             background-color: #ff4b4b;
             color: white;
@@ -119,17 +124,16 @@ with st.sidebar:
         
     st.markdown("---")
     
-    # 5. Clear History Button
+    #5. Clear History Button
     if st.button("⚠️ Clear History"):
-        # 1. Wipe DB
         clear_database()
-        # 2. Wipe RAM
+        delete_all_sessions()
         st.session_state.clear()
-        # 3. Reload
         st.rerun()
 
 # --- 4. Main Chat Area ---
 
+# Display Chat History
 for message in st.session_state['message_history']:
     with st.chat_message(message['role']):
         st.markdown(message['content'])
@@ -137,17 +141,24 @@ for message in st.session_state['message_history']:
 user_input = st.chat_input("Type here...")
 
 if user_input:
-    # A. Generate Title (Only for first message)
-    if len(st.session_state['message_history']) == 0:
-        current_id = st.session_state['thread_id']
-        new_name = generate_title(user_input)
-        st.session_state['thread_names'][current_id] = new_name
+    # We check if history is empty OR if title is still generic "New Chat"
+    current_title = thread_titles.get(st.session_state['thread_id'], "New Chat")
     
+    if len(st.session_state['message_history']) == 0 or current_title == "New Chat":
+        # Generate new title
+        new_name = generate_title(user_input)
+        # Save to Database immediately
+        save_session_title(st.session_state['thread_id'], new_name)
+
+    # Add User Message to State
     st.session_state['message_history'].append({'role': 'user', 'content': user_input})
     with st.chat_message('user'):
         st.markdown(user_input)
 
+    # Stream Assistant Response
     with st.chat_message('assistant'):
+        CONFIG = {"configurable": {"thread_id": st.session_state["thread_id"]}}
+        
         def stream_generator():
             for chunk, meta in chatbot.stream(
                 {"messages": [HumanMessage(content=user_input)]},
@@ -159,8 +170,9 @@ if user_input:
         
         ai_msg = st.write_stream(stream_generator)
 
+    # Add AI Message to State
     st.session_state['message_history'].append({'role': 'assistant', 'content': ai_msg})
 
-    # Force Refresh to update sidebar title
+    # Force Refresh (Only on first message to update the sidebar title)
     if len(st.session_state['message_history']) <= 2:
         st.rerun()
