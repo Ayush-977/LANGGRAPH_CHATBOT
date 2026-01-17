@@ -2,14 +2,19 @@
   "version": 2,
   "builds": [
     {
-      "src": "api/langgraph_frontend.py",
+      "src": "api/index.py",
       "use": "@vercel/python"
     }
   ],
+  "functions": {
+    "api/*.py": {
+      "excludeFiles": "{.venv/**,venv/**,tests/**,data/**,*.pkl}"
+    }
+  },
   "routes": [
     {
       "src": "/(.*)",
-      "dest": "api/langgraph_frontend.py"
+      "dest": "api/index.py"
     }
   ]
 }
