@@ -14,7 +14,6 @@ click==8.3.1
 colorama==0.4.6
 dataclasses-json==0.6.7
 distro==1.9.0
-faiss-cpu==1.13.2
 filetype==1.2.0
 frozenlist==1.8.0
 gitdb==4.0.12
@@ -51,11 +50,9 @@ marshmallow==3.26.2
 multidict==6.7.0
 mypy_extensions==1.1.0
 narwhals==2.14.0
-numpy==2.4.0
 orjson==3.11.5
 ormsgpack==1.12.1
 packaging==25.0
-pandas==2.3.3
 pillow==12.0.0
 propcache==0.4.1
 protobuf==6.33.2
