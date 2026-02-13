@@ -59,7 +59,15 @@ tools = [calculator,search_tool]
 llm_tools = llm.bind_tools(tools)
 
 def chat(state: AgentState) -> AgentState:
-    return {"messages": [llm_tools.invoke([SystemMessage(content="You are a helpful assistant. Use tools only when required and give answer according to that tool output."), *state["messages"]])
+    return {"messages": [llm_tools.invoke([SystemMessage(content=
+"You are a helpful assistant. "
+                "Use tools only when the user explicitly asks for information "
+                "that requires calling a tool. "
+                "For greetings, casual chat, or explanations, respond normally "
+                "without calling any tool. "
+                "Think step-by-step and choose the simplest action."
+            
+), *state["messages"]])
 ]}
 
 tool_node = ToolNode(tools)
