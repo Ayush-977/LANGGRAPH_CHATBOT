@@ -43,7 +43,6 @@ def calculator(a:float,b:float,operation:str) -> dict:
 
 
 
-
 # --- 1. Setup Database ---
 DB_NAME = "chatbot.db"
 # check_same_thread=False is crucial for Streamlit's concurrency model
@@ -55,7 +54,7 @@ class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
 llm = ChatGroq(model="llama-3.1-8b-instant")
-tools = [get_stock_price,calculator,search_tool]
+tools = [calculator,search_tool]
 
 llm_tools = llm.bind_tools(tools)
 
