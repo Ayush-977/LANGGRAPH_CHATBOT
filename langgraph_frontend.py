@@ -12,7 +12,7 @@ from session_db import init_db, save_session_title, get_all_sessions, delete_all
 # ----------------
 init_db()
 
-# Streamlit page config MUST be called before any other Streamlit command
+
 st.set_page_config(layout="wide")
 
 
