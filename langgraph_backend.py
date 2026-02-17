@@ -5,7 +5,7 @@ from langgraph.graph.message import add_messages
 from langgraph.checkpoint.sqlite import SqliteSaver
 from langchain_groq import ChatGroq
 from langchain_core.messages import BaseMessage,SystemMessage,HumanMessage
-
+from langchain_community.tools import DuckDuckGoSearchRun
 from langgraph.prebuilt import ToolNode,tools_condition
 from langchain_core.tools import tool
 from dotenv import load_dotenv
@@ -13,6 +13,35 @@ import requests
 
 load_dotenv()
 
+# --- Tools ---
+search_tool = DuckDuckGoSearchRun(region="us-en")
+
+@tool
+def calculator(a:float,b:float,operation:str) -> dict:
+  """
+  Perform a basic arithmetic operation on two numbers.
+  Supported operations: add,sub,mul,div
+  """
+  try:
+    if operation == "add":
+      result = a + b
+    elif operation == "sub":
+      result = a - b
+    elif operation == "mul":
+      result = a * b
+    elif operation == "div":
+      if b == 0:
+        return {"error": "Division by zero is not possible"}
+      result = a / b
+    else:
+      return {"error": f"Unsupported operation '{operation}'"}
+    
+    return {"a": a , "b": b , "operation":operation, "result":result}
+  
+  except Exception as e:
+    return {"error": str(e)}
+  
+tools = [calculator,search_tool]
 
 # --- 1. Setup Database ---
 DB_NAME = "chatbot.db"
@@ -25,7 +54,7 @@ class AgentState(TypedDict):
     messages: Annotated[list[BaseMessage], add_messages]
 
 llm = ChatGroq(model="llama-3.1-8b-instant")
-
+llm_tools = llm.bind_tools(tools)
 
 def chat(state: AgentState) -> AgentState:
     system_msg = SystemMessage(
