@@ -198,7 +198,7 @@ if user_input:
                 if isinstance(message_chunk, AIMessage):
                     yield message_chunk.content
 
-        ai_message = st.write_stream(ai_only_stream())
+        ai_msg = st.write_stream(ai_only_stream())
 
         # Finalize only if a tool was actually used
         if status_holder["box"] is not None:
