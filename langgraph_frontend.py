@@ -206,12 +206,12 @@ if user_input:
                 if isinstance(message_chunk, AIMessage) and message_chunk.content:
                     yield message_chunk.content
 
-        assistant_text = st.write_stream(unified_stream())
+        ai_msg = st.write_stream(unified_stream())
 
         if status_box["ref"] is not None:
             status_box["ref"].update(label="✅ Tool finished", state="complete", expanded=False)
 
-    st.session_state["message_history"].append({"role": "assistant", "content": assistant_text})
+    st.session_state["message_history"].append({"role": "assistant", "content": ai_msg})
 
     if len(st.session_state["message_history"]) <= 2:
         st.rerun()
