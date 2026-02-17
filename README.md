@@ -1,37 +1,192 @@
 # 🤖 LangGraph Chatbot with Groq & Streamlit
 
-A stateful, conversational AI chatbot built using **LangGraph** for orchestration and **Groq** for ultra-fast inference. The application features a clean user interface powered by **Streamlit** and supports persistent conversation memory.
+A stateful, high‑performance conversational AI chatbot powered by **LangGraph** for orchestration and **Groq** for ultra‑fast inference using Llama 3.  
+This project includes a fully persistent conversation memory, Streamlit UI, SQLite-based session storage, and modular backend architecture.
 
-🔗 **[Live Demo](https://chat-graph.streamlit.app/)** _(Click to chat!)_
+🔗 **Live Demo:** _Add link when deployed_
+
+---
 
 ## ✨ Features
 
-- **⚡ Powered by Groq:** Utilizes the Llama 3 model via Groq for lightning-fast responses.
-- **🧠 Persistent Memory:** Uses LangGraph's state management to remember context across multiple turns of conversation.
-- **💾 Database Integration:** Uses **SQLite** to automatically save and retrieve conversation history and session states.
-- **🕸️ LangGraph Architecture:** Built on a graph-based workflow for robust control flow.
-- **🎨 Streamlit UI:** A clean, responsive chat interface.
-- **🛠️ Modular Design:** Separated frontend (`langgraph_frontend.py`) and backend (`langgraph_backend.py`) logic.
+### ⚡ Groq‑Accelerated Llama 3
+
+Uses **Groq’s ultra‑fast LLM inference** to generate responses in real time.
+
+### 🧠 Stateful Memory with LangGraph
+
+Conversation history persists across turns using LangGraph’s state graph and SQLite checkpointing.
+
+### 💾 Persistent Database Storage
+
+All chat sessions, titles, and messages are stored in SQLite for retrieval across app restarts.
+
+### 🎛️ LangGraph Architecture
+
+A graph‑based workflow handles:
+
+- LLM responses
+- Tool calling
+- State transitions
+- Multi-step conversational logic
+
+### 🎨 Streamlit Frontend
+
+A clean and responsive UI featuring:
+
+- Sidebar chat history
+- Tool execution status
+- Live streaming responses
+- Auto‑generated conversation titles
+
+### 🧱 Modular Codebase
+
+- `langgraph_frontend.py` → Streamlit UI
+- `langgraph_backend.py` → LLM, LangGraph nodes, tools
+- `session_db.py` → SQLite session manager
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Python 3.10+**
-- **LangGraph** (State management)
-- **LangChain** (LLM Framework)
-- **Groq API** (Inference Engine)
-- **Streamlit** (Frontend)
-- **SQLite** (Database)
+| Component               | Technology     |
+| ----------------------- | -------------- |
+| **Language**            | Python 3.10+   |
+| **LLM Framework**       | LangChain      |
+| **Graph Orchestration** | LangGraph      |
+| **Model Provider**      | Groq (Llama 3) |
+| **Frontend**            | Streamlit      |
+| **Database**            | SQLite         |
+
+---
 
 ## 🚀 Installation & Local Setup
 
-Follow these steps to run the chatbot on your local machine.
-
-### 1. Clone the Repository
+### 1️⃣ Clone the Repository
 
 ```bash
-git clone [https://github.com/Ayush-977/LANGGRAPH_Chatbot.git](https://github.com/Ayush-977/LANGGRAPH_Chatbot.git)
+git clone https://github.com/Ayush-977/LANGGRAPH_Chatbot.git
 cd LANGGRAPH_Chatbot
-HEAD
 ```
 
-a4eb9a1ddc8563b12ede2cc35645c62c89bbc9ce
+### 2️⃣ Create a Virtual Environment
+
+```bash
+python -m venv venv
+source venv/bin/activate     # Linux/Mac
+venv\Scripts\activate        # Windows
+```
+
+### 3️⃣ Install Dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4️⃣ Add Your Groq API Key
+
+Create a `.env` file in the project root:
+
+```
+GROQ_API_KEY=your_key_here
+```
+
+### 5️⃣ Run the Application
+
+```bash
+streamlit run langgraph_frontend.py
+```
+
+---
+
+## 📁 Project Structure
+
+```
+LANGGRAPH_Chatbot/
+│
+├── langgraph_frontend.py     # Streamlit UI
+├── langgraph_backend.py      # LLM, LangGraph nodes, tools
+├── session_db.py             # SQLite session storage
+├── chatbot.db                # Auto-generated database
+├── requirements.txt
+├── README.md
+└── .env
+```
+
+---
+
+## 🧩 How It Works (High-Level Architecture)
+
+### LangGraph Backend
+
+- Defines **state machine** with `AgentState`
+- Adds LLM node
+- Supports tool execution (optional)
+- Stores state using SQLite checkpointing
+
+### Streamlit Frontend
+
+- Displays chat messages
+- Streams responses in real-time
+- Auto-generates conversation titles
+- Manages multiple conversations with radio menu
+- Shows tool execution status using `st.status()`
+
+### Database
+
+Stores:
+
+- User sessions
+- Titles
+- Message history
+- LangGraph checkpoints
+
+---
+
+## 🧰 Customizing the Chatbot
+
+### 🟣 System Prompt
+
+Defined in `langgraph_backend.py`:
+
+```python
+SystemMessage(
+    content="You are a helpful assistant..."
+)
+```
+
+### 🟢 Add Tools
+
+Use LangChain `@tool` decorator and connect them to the graph.
+
+### 🔵 Modify Frontend UI
+
+Located in `langgraph_frontend.py`.
+
+---
+
+## 🧪 Example Usage
+
+Ask anything — the chatbot:
+
+- Streams answers
+- Remembers context
+- Dynamically decides whether to use tools (if configured)
+- Stores your conversations for later
+
+---
+
+## 👨‍💻 Contributing
+
+Pull requests are welcome!  
+If you want to contribute:
+
+1. Fork the repo
+2. Create a feature branch
+3. Submit a PR
+
+---
+
+## 📜 License
+
+This project is open-source under the **MIT License**.
