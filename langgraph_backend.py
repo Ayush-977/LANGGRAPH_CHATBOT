@@ -36,6 +36,8 @@ def chat(state: AgentState) -> AgentState:
             "For greetings, casual chat, or explanations, respond normally "
             "without calling any tool. "
             "Think step-by-step and choose the simplest action."
+            "Don't ask the user if they want to chat or want help."
+            "Try to figure out on your own if tools is required then use it else go with the flow"
         )
     )
     messages = [system_msg] + state["messages"]
