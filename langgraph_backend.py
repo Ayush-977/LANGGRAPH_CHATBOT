@@ -67,7 +67,7 @@ def chat(state: AgentState) -> AgentState:
                 "without calling any tool. "
                 "Think step-by-step and choose the simplest action."
             
-) + state["messages"]]
+) , state["messages"]]
     
     response = llm_tools.invoke(messages)
 
@@ -82,7 +82,6 @@ graph.add_node("llm", chat)
 graph.add_node("tools",tool_node)
 graph.add_edge(START, "llm")
 graph.add_conditional_edges("llm",tools_condition)
-graph.add_edge("llm", END)
 graph.add_edge("tools","llm")
 
 chatbot = graph.compile(checkpointer=checkpointer)
