@@ -76,7 +76,7 @@ def write_file(path: str, content: str) -> str:
 
 
 
-tools = [eval_math,search_tool,http_get,current_time,extract_keywords,python_eval,read_file,write_file]
+tools = [eval_math,search_tool,http_get,current_time,python_eval,read_file,write_file]
 
 # --- 1. Setup Database ---
 DB_NAME = "chatbot.db"
