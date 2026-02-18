@@ -126,7 +126,7 @@ def chat(state: AgentState) -> AgentState:
 )
     messages = [system_msg] + state["messages"]
     
-    response = llm.invoke(messages)
+    response = llm_tools.invoke(messages)
     return {"messages": [response]}
 
 tool_node = ToolNode(tools)    
