@@ -14,12 +14,7 @@ import requests
 load_dotenv()
 
 # --- Tools ---
-@tool
-def search(user_input: str) -> str:
-    try:
-        search_tool = DuckDuckGoSearchRun(region="us-en")
-    except Exception as e:
-        return {"error": str(e)}
+search_tool = DuckDuckGoSearchRun(region="us-en")
 
 @tool
 def eval_math(expression: str) -> dict:
@@ -90,7 +85,7 @@ def write_file(path: str, content: str) -> str:
 
 
 
-tools = [eval_math,search,http_get,current_time,extract_keywords,python_eval,read_file,write_file]
+tools = [eval_math,search_tool,http_get,current_time,extract_keywords,python_eval,read_file,write_file]
 
 # --- 1. Setup Database ---
 DB_NAME = "chatbot.db"
