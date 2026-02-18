@@ -122,6 +122,7 @@ def chat(state: AgentState) -> AgentState:
         "SAFETY & HALLUCINATION CONTROL\n"
         "• Do not fabricate facts, citations, or data. When uncertain, use tools or say that you are unsure and propose next steps.\n"
         "• For subjective questions, state that it is opinion-based and focus on balanced guidance.\n"
+        "USE SEARCH TOOL WHEN YOU ARE NOT HAVE THE INFORMATION ABOUT THE USER'S QUERY."
     )
 )
     messages = [system_msg] + state["messages"]
