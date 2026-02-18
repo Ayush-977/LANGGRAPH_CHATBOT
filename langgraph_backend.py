@@ -17,8 +17,6 @@ load_dotenv()
 search_tool = DuckDuckGoSearchRun(region="us-en")
 
 @tool
-
-@tool
 def eval_math(expression: str) -> dict:
     "Evaluate a math expression safely."
     import math
