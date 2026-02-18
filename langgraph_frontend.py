@@ -11,18 +11,13 @@ from session_db import init_db, save_session_title, get_all_sessions, delete_all
 # ----------------
 # Initialization
 # ----------------
-st.set_page_config(layout="wide")  # ✅ must be first Streamlit command
+st.set_page_config(layout="wide") 
 init_db()
 
-# -------------
-# Helpers
-# -------------
 
 def generate_title(first_message_content: str) -> str:
     """Generate a very short title (≤ 4 words, ≤ 30 chars)."""
     try:
-        # Ensure your environment has GROQ_API_KEY
-        # e.g., export GROQ_API_KEY="your_key_here"
         llm = ChatGroq(model="llama-3.1-8b-instant")
         messages = [
             SystemMessage(content="Return ONLY a concise chat title, MAX 4 words, no quotes."),
@@ -55,7 +50,6 @@ def load_convo(thread_id: str):
             ui_msgs.append({"role": "user", "content": msg.content})
         elif isinstance(msg, AIMessage):
             ui_msgs.append({"role": "assistant", "content": msg.content})
-        # Skip ToolMessage & others in UI history
     return ui_msgs
 
 # -------------------------------
@@ -74,7 +68,7 @@ thread_titles = {st.session_state["thread_id"]: "New Chat"}
 # Sidebar
 # -----------
 with st.sidebar:
-    st.title("LangGraph Chat")
+    st.title("LangGraph Chatbot")
 
     # New Chat
     if st.button("➕ New Chat", use_container_width=True):
@@ -119,7 +113,6 @@ with st.sidebar:
         st.session_state["message_history"] = load_convo(selected_id)
         st.rerun()
 
-    # ✅ Proper CSS (no HTML entities)
     st.markdown(
         """
         <style>
